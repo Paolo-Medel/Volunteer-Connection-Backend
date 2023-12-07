@@ -1,4 +1,4 @@
-from rest_framework import serializers
+from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from django.contrib.auth.models import User
@@ -6,7 +6,7 @@ from volunteerapi.models import VolunteerUsers, CauseAreas, JobPosts
 
 
 class VolunteerUsersView(ViewSet):
-    """Viewset for volunteer_users"""
+    """View set for volunteer_users"""
 
     def retrieve(self, request, pk=None):
         """Handle GET requests for single game
@@ -14,9 +14,12 @@ class VolunteerUsersView(ViewSet):
         Returns:
             Response -- JSON serialized game instance
         """
-        volunteer_user = VolunteerUsers.objects.get(pk=pk)
-        serialized = VolunteerUsersSerializer(volunteer_user)
-        return Response(serialized.data)
+        try:
+            volunteer_user = VolunteerUsers.objects.get(pk=pk)
+            serialized = VolunteerUsersSerializer(volunteer_user)
+            return Response(serialized.data)
+        except VolunteerUsers.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 
     def list(self, request):
@@ -25,9 +28,32 @@ class VolunteerUsersView(ViewSet):
         Returns:
             Response -- JSON serialized list of volunteer_users
         """
-        volunteer_users = VolunteerUsers.objects.all()
-        serialized = VolunteerUsersSerializer(volunteer_users, many=True)
-        return Response(serialized.data)
+        try:
+            volunteer_users = VolunteerUsers.objects.all()
+            serialized = VolunteerUsersSerializer(volunteer_users, many=True)
+            return Response(serialized.data)
+        except VolunteerUsers.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+    def update(self, request, pk=None):
+        try:
+            volunteer = VolunteerUsers.objects.get(pk=pk)
+            serializer = UpdateVolunteerUsersSerializer(volunteer, data=request.data, context={'request': request})
+            if serializer.is_valid():
+                volunteer.user = serializer.validated_data['user']
+                volunteer.bio = serializer.validated_data['bio']
+                volunteer.profile_image_url = serializer.validated_data['profile_image_url']
+                volunteer.save()
+                cause_area_data = request.data.get('cause_area', [])
+                volunteer.cause_area.set(cause_area_data)
+                serializer = UpdateVolunteerUsersSerializer(volunteer, context={'request': request})
+                return Response(None, status.HTTP_204_NO_CONTENT)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except VolunteerUsers.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+
 
 class UserVolunteerUsersSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
@@ -59,6 +85,12 @@ class VolunteerUsersSerializer(serializers.ModelSerializer):
     user = UserVolunteerUsersSerializer(many=False)
     cause_area = CauseAreaVolunteerUsersSerializers(many=True)
     favorite = FavoritesVolunteerUsersSerializer(many=True)
+
+    class Meta:
+        model = VolunteerUsers
+        fields = ('id', 'bio', 'profile_image_url', 'created_on', 'user', 'is_business', 'cause_area', 'favorite')
+
+class UpdateVolunteerUsersSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = VolunteerUsers
