@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from django.contrib.auth.models import User
-from volunteerapi.models import VolunteerUsers
+from volunteerapi.models import VolunteerUsers, CauseAreas, JobPosts
 
 
 class VolunteerUsersView(ViewSet):
@@ -43,8 +43,22 @@ class UserVolunteerUsersSerializer(serializers.ModelSerializer):
         model = User
         fields = ('full_name', 'email', 'username')
 
+class FavoritesVolunteerUsersSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = JobPosts
+        fields = ('title', 'content', 'address', 'publication_date')
+
+class CauseAreaVolunteerUsersSerializers(serializers.ModelSerializer):
+
+    class Meta:
+        model = CauseAreas
+        fields = ('id', 'label')
+
 class VolunteerUsersSerializer(serializers.ModelSerializer):
     user = UserVolunteerUsersSerializer(many=False)
+    cause_area = CauseAreaVolunteerUsersSerializers(many=True)
+    favorite = FavoritesVolunteerUsersSerializer(many=True)
 
     class Meta:
         model = VolunteerUsers
