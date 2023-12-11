@@ -67,7 +67,7 @@ class UserVolunteerUsersSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('full_name', 'email', 'username')
+        fields = ('id', 'full_name', 'email', 'username')
 
 class FavoritesVolunteerUsersSerializer(serializers.ModelSerializer):
 
