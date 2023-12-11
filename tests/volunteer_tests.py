@@ -3,6 +3,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework import status
 from rest_framework.test import APITestCase
 from volunteerapi.models import VolunteerUsers
+from django.contrib.auth.models import User
 
 class VolunteerTests(APITestCase):
 
@@ -41,3 +42,31 @@ class VolunteerTests(APITestCase):
         self.assertIsNotNone(json_response[2])
         self.assertIsNotNone(json_response[3])
         self.assertIsNotNone(json_response[4])
+
+    def test_update_volunteer(self):
+        user = User.objects.create(username="test_user", email="test@example.com")
+
+        volunteer = VolunteerUsers()
+        volunteer.bio = 'test'
+        volunteer.profile_image_url = '123'
+        volunteer.is_business = False
+        volunteer.user = user
+        volunteer.save()  # Save the volunteer instance to get an ID
+        volunteer.cause_area.set([])  # Use set() for many-to-many field
+        volunteer.favorite.set([])
+
+        data = {
+            "user": user.id,
+            "bio": "update",
+            "profile_image_url": "https://ychef.files.bbci.co.uk/1280x720/p0gg3k8j.jpg",
+        }
+
+        response = self.client.put(f"/volunteers/{volunteer.id}", data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        response = self.client.get(f"/volunteers/{volunteer.id}")
+        json_response = json.loads(response.content)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(json_response["bio"], "update")
+        self.assertEqual(json_response["profile_image_url"], "https://ychef.files.bbci.co.uk/1280x720/p0gg3k8j.jpg")
