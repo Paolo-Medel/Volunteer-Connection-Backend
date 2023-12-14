@@ -25,6 +25,11 @@ export const EditOpportunity = () => {
   useEffect(() => {
     RetrieveOpportunities(postId).then((obj) => {
       setEditedPost(obj);
+
+      let cause_area_id = [];
+      const cause_areas = obj.cause_area;
+      cause_areas.map((obj) => cause_area_id.push(obj.id));
+      updateChosen(new Set(cause_area_id));
     });
 
     getCauseAreas().then((obj) => {
@@ -47,9 +52,13 @@ export const EditOpportunity = () => {
         }`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(editedPost),
+      body: JSON.stringify({
+        ...editedPost,
+        cause_area: Array.from(chosenCauses),
+        user: editedPost.user.id,
+      }),
     });
-    navigate(`/posts/${postId}`);
+    navigate(`/`);
   };
 
   return (
@@ -101,7 +110,7 @@ export const EditOpportunity = () => {
             <input
               className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
               type="checkbox"
-              checked={editedPost.cause_area.some((obj) => obj.id === c.id)}
+              checked={chosenCauses.has(c.id)}
               onChange={() => {
                 handleCauseChosen(c);
               }}
@@ -110,15 +119,28 @@ export const EditOpportunity = () => {
           </div>
         ))}
       </fieldset>
+      <fieldset>
+        <div className="flex items-center">
+          <input
+            checked={editedPost.approved}
+            onChange={() => {
+              const copy = { ...editedPost };
+              if (copy.approved === true) {
+                copy.approved = false;
+              } else {
+                copy.approved = true;
+              }
+              setEditedPost(copy);
+            }}
+            type="checkbox"
+            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+          ></input>
+          <div className="ms-2 text-sm text-white">Approved</div>
+        </div>
+      </fieldset>
       <button type="submit" className="btn-edit mb-4">
         Save Changes
       </button>
     </form>
   );
 };
-
-//   editedPost.cause_area.map((obj) => {
-//     if (obj.id === c.id) {
-//       return true;
-//     } else return false;
-//   })

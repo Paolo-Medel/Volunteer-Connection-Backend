@@ -14,7 +14,10 @@ export const AllOpportunities = () => {
 
   useEffect(() => {
     GetOpportunities().then((data) => {
-      setPosts(data);
+      const approvedOpportunities = data.filter(
+        (opportunity) => opportunity.approved
+      );
+      setPosts(approvedOpportunities);
     });
     const volunteer_object = JSON.parse(
       localStorage.getItem("volunteer_token")
@@ -98,7 +101,6 @@ export const AllOpportunities = () => {
                     >
                       Delete
                     </button>
-                    <button className="btn-edit">Unapprove</button>
                   </div>
                 ) : (
                   <></>
