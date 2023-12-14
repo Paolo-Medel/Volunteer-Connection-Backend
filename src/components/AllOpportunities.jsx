@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+  DeleteOpportunity,
   GetOpportunities,
   RetrieveOpportunities,
 } from "../services/opportunitiesService";
@@ -88,7 +89,15 @@ export const AllOpportunities = () => {
                     <NavLink to={`/EditOpportunity/${post.id}`}>
                       <button className="btn-edit">Edit</button>
                     </NavLink>
-                    <button className="btn-edit">Delete</button>
+                    <button
+                      className="btn-edit"
+                      onClick={() => {
+                        DeleteOpportunity(post.id);
+                        window.location.reload();
+                      }}
+                    >
+                      Delete
+                    </button>
                     <button className="btn-edit">Unapprove</button>
                   </div>
                 ) : (

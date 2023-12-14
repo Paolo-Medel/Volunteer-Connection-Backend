@@ -19,3 +19,15 @@ export const RetrieveOpportunities = (id) => {
     },
   }).then((res) => res.json());
 };
+
+export const DeleteOpportunity = (id) => {
+  const variable = JSON.parse(localStorage.getItem("volunteer_token"));
+  const token = variable.token;
+  return fetch(`http://localhost:8000/posts/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Token ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+};

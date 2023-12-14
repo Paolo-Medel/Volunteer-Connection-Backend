@@ -16,7 +16,7 @@ export const CreateOpportunity = () => {
 
   const navigate = useNavigate();
 
-  const handleTagChosen = (cause) => {
+  const handleCauseChosen = (cause) => {
     const copy = new Set(chosenCauses);
     copy.has(cause.id) ? copy.delete(cause.id) : copy.add(cause.id);
     updateChosen(copy);
@@ -45,10 +45,9 @@ export const CreateOpportunity = () => {
         }`,
         "Content-Type": "application/json",
       },
-      //! Line below needs to be changed
       body: JSON.stringify({
         ...newPost,
-        cause_areas: Array.from(chosenCauses),
+        cause_area: Array.from(chosenCauses),
       }),
     });
     navigate("/");
@@ -89,7 +88,7 @@ export const CreateOpportunity = () => {
       <fieldset>
         <div>
           <input
-            name="image_url"
+            name="address"
             placeholder="Address"
             value={newPost.address}
             className="input-text w-[512px]"
@@ -129,12 +128,14 @@ export const CreateOpportunity = () => {
       </fieldset> */}
       <fieldset className="flex flex-wrap gap-4">
         {causes.map((c) => (
-          <div className="flex items-center" key={`tags-${c.id}`}>
+          <div className="flex items-center" key={c.id}>
             <input
               className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
               type="checkbox"
-              checked={chosenCauses.has(c.id)}
-              onChange={() => handleTagChosen(c)}
+              // checked={chosenCauses.has(c.id)}
+              onChange={() => {
+                handleCauseChosen(c);
+              }}
             />
             <div className="ms-2 text-sm text-white">{c.label}</div>
           </div>
