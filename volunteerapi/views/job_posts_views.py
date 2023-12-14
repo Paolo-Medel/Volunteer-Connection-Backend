@@ -42,9 +42,9 @@ class PostSerializer(serializers.ModelSerializer):
     is_owner = serializers.SerializerMethodField()
 
     # Function containing instructions for ad-hoc property
-    def get_is_owner(self, obj):
+    def get_is_owner(self, obj,):
         # Check if the authenticated user is the owner
-        return self.context['request'].user.id == obj.user_id
+        return self.context['request'].user.id == obj.user.user_id
 
     class Meta:
         model = JobPosts
@@ -53,7 +53,7 @@ class PostSerializer(serializers.ModelSerializer):
 
 class JobPostsView(ViewSet):
     def list(self, request):
-        posts = JobPosts.objects.filter(approved=True, publication_date__lte=timezone.now()).order_by('-publication_date')
+        posts = JobPosts.objects.filter(publication_date__lte=timezone.now()).order_by('-publication_date')
         serialized = PostSerializer(posts, many=True, context={'request': request})
         return Response(serialized.data, status=status.HTTP_200_OK)
 
@@ -115,7 +115,7 @@ class JobPostsView(ViewSet):
     def destroy(self, request, pk=None):
         try:
             post = JobPosts.objects.get(pk=pk)
-            if request.user.id != post.user_id:
+            if request.user.volunteerusers.id != post.user_id:
                 raise PermissionDenied("You do not have permission to delete this post.")
             post.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)

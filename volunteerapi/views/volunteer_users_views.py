@@ -47,6 +47,8 @@ class VolunteerUsersView(ViewSet):
                 volunteer.save()
                 cause_area_data = request.data.get('cause_area', [])
                 volunteer.cause_area.set(cause_area_data)
+                favorite_data = request.data.get('favorite', [])
+                volunteer.favorite.set(favorite_data)
                 serializer = UpdateVolunteerUsersSerializer(volunteer, context={'request': request})
                 return Response(None, status.HTTP_204_NO_CONTENT)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -73,7 +75,7 @@ class FavoritesVolunteerUsersSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = JobPosts
-        fields = ('title', 'content', 'address', 'publication_date')
+        fields = ('id', 'title', 'content', 'address', 'publication_date')
 
 class CauseAreaVolunteerUsersSerializers(serializers.ModelSerializer):
 
